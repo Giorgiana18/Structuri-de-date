@@ -1,0 +1,170 @@
+#include <iostream>
+using namespace std;
+struct Nod
+{
+    int data;
+    Nod* stanga;
+    Nod* dreapta;
+    int inaltime;
+};
+int inaltime(Nod* nod)
+{
+    if(nod==nullptr)
+    {
+        return 0;
+    }
+    return nod->inaltime;
+}
+/*Funcția inaltime primește ca argument un nod al arborelui și returnează înălțimea acestuia.
+  Dacă nodul este nullptr, adică arborele este vid, înălțimea este 0.
+  În caz contrar, se returnează valoarea stocată în câmpul inaltime al nodului,
+  care reprezintă înălțimea calculată pentru acel nod în momentul inserării sau actualizării arborelui.*/
+int factorul_de_echilibru(Nod* nod)
+{
+    if(nod==nullptr)
+    {
+        return 0;
+    }
+    return inaltime(nod->stanga)-inaltime(nod->dreapta);
+}
+/*Funcția factorul_de_echilibru primește ca argument un nod al arborelui și calculează factorul de echilibru al acelui nod.
+Dacă nodul este nullptr, adică arborele este vid, factorul de echilibru este 0.
+În caz contrar, se calculează înălțimile subarborilor stâng și drept ai nodului și se returnează diferența dintre acestea.
+Factorul de echilibru este utilizat pentru a determina dacă arborele necesită operații de rotație pentru a menține echilibrul.*/
+void actualizare_inaltime(Nod* nod)
+{
+    int inaltime_stanga=inaltime(nod->stanga);
+    int inaltime_dreapta=inaltime(nod->dreapta);
+    nod->inaltime=max(inaltime_stanga,inaltime_dreapta)+1;/*determină înălțimea maximă dintre subarborii stâng și drept.*/
+}
+/*Funcția actualizare_inaltime primește ca argument un nod al arborelui și actualizează înălțimea acestuia.
+În funcție de înălțimile subarborilor stâng și drept ai nodului, se calculează înălțimea maximă și se adaugă 1 pentru a obține
+înălțimea actualizată a nodului curent.
+ Această înălțime este stocată în câmpul inaltime al nodului, permițând astfel urmărirea înălțimii fiecărui nod în mod eficient.
+ Actualizarea înălțimii este necesară pentru a asigura corectitudinea factorului de echilibru și pentru a menține echilibrul arborelui.*/
+Nod* creare_nod(int valoare)
+{
+    Nod* nod_nou=new Nod();
+    if(!nod_nou)
+    {
+        cout<<"Eroare la alocarea memoriei!"<<endl;
+        return nullptr;
+    }
+    nod_nou->data=valoare;
+    nod_nou->stanga=nod_nou->dreapta=nullptr;/*nodul nu are încă copii.*/
+    nod_nou->inaltime=1;
+}
+/*primește o valoare ca argument și returnează un pointer către un nod nou creat.
+ se alocă dinamic memorie pentru un nou obiect de tipul Nod utilizând operatorul new.
+ Dacă alocarea de memorie nu reușește (adică nod_nou este nullptr), se afișează un mesaj de eroare și se returnează nullptr.*/
+Nod* rotire_dreapta(Nod* x)
+{
+    Nod* y=x->stanga;
+    Nod* a=y->dreapta;
+    y->dreapta=x;
+    x->stanga=a;
+    actualizare_inaltime(x);
+    actualizare_inaltime(y);
+    return y;
+}
+/*Funcția rotire_dreapta primește un nod x ca argument și efectuează o rotație spre dreapta în jurul acestui nod.
+Aceasta constă în reorganizarea legăturilor între noduri pentru a schimba poziția nodului x cu nodul său stâng (y).*/
+Nod* rotire_stanga(Nod* y)
+{
+    Nod* x=y->dreapta;
+    Nod* a=x->stanga;
+    x->stanga=y;
+    y->dreapta=a;
+    actualizare_inaltime(y);
+    actualizare_inaltime(x);
+    return x;/*eturnează adresa noului nod rădăcină (x), care a înlocuit nodul inițial (y)*/
+}
+/*Funcția rotire_stanga primește un nod y ca argument și efectuează o rotație spre stânga în jurul acestui nod.
+Aceasta implică reorganizarea legăturilor între noduri pentru a schimba poziția nodului y cu nodul său drept (x).*/
+Nod* inserare_nod(Nod* radacina,int valoare)
+{
+    if(radacina==nullptr)
+    {
+        return creare_nod(valoare);
+    }
+    /*se verifică dacă rădăcina este nullptr.
+    Dacă da, înseamnă că arborele este vid, deci se creează un nou nod utilizând funcția creare_nod și se returnează adresa acestuia*/
+    if(valoare<radacina->data)
+    {
+        radacina->stanga=inserare_nod(radacina->stanga,valoare);
+    }
+    else
+        if(valoare>radacina->data)
+    {
+        radacina->dreapta=inserare_nod(radacina->dreapta,valoare);
+    }
+    else
+    {
+        return radacina;
+    }
+    /* Dacă valoarea este mai mică decât valoarea rădăcinii, se apelează recursiv inserare_nod pentru a insera valoarea în
+    subarborele stâng al rădăcinii. Altfel, dacă valoarea este mai mare, se apelează recursiv inserare_nod pentru a
+    insera valoarea în subarborele drept al rădăcinii.*/
+    actualizare_inaltime(radacina);
+    int echilibru=factorul_de_echilibru(radacina);
+    if(echilibru>1 && valoare<(radacina->stanga)->data)
+    {
+        return rotire_dreapta(radacina);
+    }
+    /*Dacă factorul de echilibru este mai mare decât 1 și valoarea inserată se află în subarborele stâng al subarborelui stâng al rădăcinii,
+       se realizează o rotație spre dreapta în jurul rădăcinii utilizând funcția rotire_dreapta.*/
+    if(echilibru>1 && valoare>(radacina->stanga)->data)
+    {
+        radacina->dreapta=rotire_dreapta(radacina->dreapta);
+        return rotire_stanga(radacina);
+    }
+    return radacina;
+    /*Dacă factorul de echilibru este mai mare decât 1 și valoarea inserată se află în subarborele drept al subarborelui stâng al rădăcinii,
+      se realizează o rotație spre dreapta în jurul subarborelui stâng al rădăcinii, urmată de o rotație spre stânga în
+      jurul rădăcinii utilizând funcția rotire_stanga.La final, se returnează adresa rădăcinii actualizate.*/
+}
+void parcurgere_inordine(Nod* radacina)
+{
+    if(radacina==nullptr)
+    {
+        return;
+    }
+    /*Dacă rădăcina nu este nullptr, se apelează recursiv parcurgere_inordine pentru a parcurge înordine subarborele stâng al rădăcinii.
+     Acest lucru se face pentru a parcurge întâi toți copiii stângi ai unui nod înainte de a parcurge nodul însuși.*/
+    parcurgere_inordine(radacina->stanga);
+    cout<<radacina->data<<" ";
+    parcurgere_inordine(radacina->dreapta);
+}
+/*Astfel, prin apelul funcției parcurgere_inordine cu rădăcina arborelui,
+se va afișa valoarea nodurilor în ordine crescătoare în funcție de cheile acestora, conform parcurgerii înordine.*/
+void sterge_arbore(Nod* radacina)
+{
+    if(radacina==nullptr)
+    {
+        return;
+    }
+    /*Dacă rădăcina nu este nullptr, se apelează recursiv sterge_arbore pentru a șterge subarborele stâng al rădăcinii.
+    Acest lucru se face pentru a șterge toate nodurile din subarborele stâng înainte de a șterge rădăcina însăși.*/
+    sterge_arbore(radacina->stanga);
+    sterge_arbore(radacina->dreapta);
+    delete radacina;/*se eliberează memoria ocupată de rădăcină folosind operatorul delete. Astfel, toate nodurile din arbore vor fi șterse.*/
+}
+int main()
+{
+    Nod* radacina=nullptr;
+    int numar_noduri;
+    cout<<"Introduceti numarul de noduri:";
+    cin>>numar_noduri;
+    cout<<"Introduceti valorile nodurilor:";
+    int valoare;
+    for(int i=0;i<numar_noduri;i++)
+    {
+        cin>>valoare;
+        radacina=inserare_nod(radacina,valoare);
+    }
+    cout<<"Valorile din arbore in ordine crescatoare: ";
+    parcurgere_inordine(radacina);
+    cout<<endl;
+    sterge_arbore(radacina);
+    return 0;
+}
