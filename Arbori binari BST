@@ -1,0 +1,95 @@
+#include <iostream>
+using namespace std;
+struct Nod
+{
+    int data;
+    Nod*  stanga;
+    Nod* dreapta;
+};
+Nod* creare_nod(int valoare)
+{
+    Nod* nod_nou=new Nod();
+    if(!nod_nou)
+    {
+        cout<<"Eroare la alocarea memoriei!"<<endl;
+        return nullptr;
+    }
+    nod_nou->data=valoare;
+    nod_nou->stanga=nod_nou->dreapta=nullptr;/*nodul nu are încă copii.*/
+    return nod_nou;
+}
+/*primește o valoare ca argument și returnează un pointer către un nod nou creat.
+ se alocă dinamic memorie pentru un nou obiect de tipul Nod utilizând operatorul new.
+ Dacă alocarea de memorie nu reușește (adică nod_nou este nullptr), se afișează un mesaj de eroare și se returnează nullptr.*/
+Nod* inserarea_nod(Nod* radacina,int valoare)
+{
+    if(radacina==nullptr)
+    {
+        return creare_nod(valoare);
+    }
+     /*se verifică dacă rădăcina este nullptr.
+    Dacă da, înseamnă că arborele este vid, deci se creează un nou nod utilizând funcția creare_nod și se returnează adresa acestuia*/
+    if(valoare <radacina->data)
+    {
+        radacina->stanga=inserarea_nod(radacina->stanga,valoare);
+    }
+    else
+        if(valoare>radacina->data)
+    {
+        radacina->dreapta=inserarea_nod(radacina->dreapta,valoare);
+    }
+    return radacina;
+/* Dacă valoarea este mai mică decât valoarea rădăcinii, se apelează recursiv inserare_nod pentru a insera valoarea în
+    subarborele stâng al rădăcinii. Altfel, dacă valoarea este mai mare, se apelează recursiv inserare_nod pentru a
+    insera valoarea în subarborele drept al rădăcinii.*/
+}
+void parcurgere_inordine(Nod* radacina)
+{
+    if(radacina==nullptr)
+    {
+        return;
+    }
+    /*Dacă rădăcina nu este nullptr, se apelează recursiv parcurgere_inordine pentru a parcurge înordine subarborele stâng al rădăcinii.
+     Acest lucru se face pentru a parcurge întâi toți copiii stângi ai unui nod înainte de a parcurge nodul însuși.*/
+    parcurgere_inordine(radacina->stanga);
+    cout<<radacina->data<<" ";
+    parcurgere_inordine(radacina->dreapta);
+}
+/*Astfel, prin apelul funcției parcurgere_inordine cu rădăcina arborelui,
+se va afișa valoarea nodurilor în ordine crescătoare în funcție de cheile acestora, conform parcurgerii înordine.*/
+void sterge_arbore(Nod* radacina)
+{
+    if(radacina==nullptr)
+    {
+        return;
+    }
+    /*Dacă rădăcina nu este nullptr, se apelează recursiv sterge_arbore pentru a șterge subarborele stâng al rădăcinii.
+    Acest lucru se face pentru a șterge toate nodurile din subarborele stâng înainte de a șterge rădăcina însăși.*/
+    sterge_arbore(radacina->stanga);
+    sterge_arbore(radacina->dreapta);
+    delete radacina;/*se eliberează memoria ocupată de rădăcină folosind operatorul delete. Astfel, toate nodurile din arbore vor fi șterse.*/
+}
+}
+int main()
+{
+     Nod* radacina = nullptr;
+
+    // Inserarea unor noduri în arbore
+    radacina = inserarea_nod(radacina, 5);
+    radacina = inserarea_nod(radacina, 3);
+    radacina = inserarea_nod(radacina, 2);
+    radacina = inserarea_nod(radacina, 4);
+    radacina = inserarea_nod(radacina, 7);
+    radacina = inserarea_nod(radacina, 5);
+    radacina = inserarea_nod(radacina, 8);
+
+    // Afișarea valorilor în ordine crescătoare
+    cout<<"Valorile din arbore in ordine crescatoare: ";
+    parcurgere_inordine(radacina);
+    cout<<endl;
+
+    // Ștergerea arborelui
+    sterge_arbore(radacina);
+
+    return 0;
+}
