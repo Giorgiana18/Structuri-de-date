@@ -1,0 +1,50 @@
+#include <iostream>
+using namespace std;
+struct Nod
+{
+    int* vecini;
+    int numar_vecini;
+};
+void adauga_muchie(Nod graf[],int u,int v)
+{
+    graf[u].vecini[graf[u].numar_vecini++]=v;/*adaugă v în lista de vecini a nodului u, iar apoi se incrementează numărul de vecini ai nodului u*/
+    graf[v].vecini[graf[v].numar_vecini++]=u;/*adaugă și u în lista de vecini a nodului v, iar numărul de vecini al nodului v se incrementează */
+}
+/* se stabilește o legătură bidirecțională între u și v în graf, prin actualizarea listelor de vecini ale ambelor noduri.*/
+void afiseazaListaAdiacenta(Nod graf[],int numar_noduri)
+{
+    for(int i=0;i<numar_noduri;i++)
+    {
+        cout<<"Nod"<<i<<":";
+        for(int j=0;j<graf[i].numar_vecini;j++)
+        {
+            cout<<graf[i].vecini[j]<<" ";
+        }
+        cout<<"\n";
+    }
+}
+/*se vor afișa vecinii fiecărui nod din graf, prezentându-se structura grafului în formatul listei de adiacență.*/
+int main()
+{
+    int noduri,muchii;
+    cout<<"Introduceti numarul de noduri:";
+    cin>>noduri;
+    cout<<"Introduceti numarul de muchii:";
+    cin>>muchii;
+    Nod* graf=new Nod[noduri];
+    for(int i=0;i<noduri;i++)
+    {
+        graf[i].vecini=new int[noduri];/*se alocă memorie pentru un vector de noduri elemente de tip int, care va stoca vecinii nodului respectiv */
+        graf[i].numar_vecini=0;/*e inițializează câmpul numar_vecini al fiecărui nod cu valoarea 0*/
+    }
+    for(int i=0;i<muchii;i++)
+    {
+        int u,v;
+        cout<<"Introduceti nodurile pentru muchia"<<i+1<<":"<<endl;
+        cout<<"u=";cin>>u;
+        cout<<"v=";cin>>v;
+        adauga_muchie(graf,u,v);
+    }
+    afiseazaListaAdiacenta(graf,noduri);
+    return 0;
+}
