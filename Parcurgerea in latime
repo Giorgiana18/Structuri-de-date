@@ -1,0 +1,65 @@
+#include <iostream>
+using namespace std;
+int a[20][20],sol[20],viz[20];
+int n,m,i,j,e1,e2,x,k;
+void afisare()
+{
+    for(int x=1;x<=k;x++)
+        cout<<sol[x]<<endl;
+}
+void bfs(unsigned int nod_plecare)
+{
+    int inceput=0;
+    int sfarsit=0;
+    int coada[20];
+    coada[sfarsit++]=nod_plecare;
+    viz[nod_plecare]=1;
+    sol[1]=nod_plecare;
+    k=1;
+    while(inceput!=sfarsit)
+    {
+        int nod_curent=coada[inceput++];/*extrage un nod din coadă*/
+        if(k==n)
+        {
+            afisare();
+            break;
+        }
+        /*Dacă s-au adăugat deja toate cele n noduri în soluție (k == n),
+        se apelează funcția afisare pentru a afișa soluția și se întrerupe bucla cu ajutorul instrucțiunii break.*/
+        for(unsigned int x=1;x<=n;x++)
+        {
+            if(!viz[x]&&a[x][nod_curent])
+            {
+                viz[x]=1;
+                k++;
+                sol[k]=x;
+                coada[sfarsit++]=x;
+            }
+            /*Dacă nodul x nu a fost vizitat și există o muchie între nodurile x și nod_curent (a[x][nod_curent] este diferit de zero),
+            atunci se marchează nodul x ca vizitat (viz[x] = 1), se incrementează k pentru a adăuga un nou nod în soluție,
+            se adaugă nodul x în soluție (sol[k] = x) și se adaugă nodul x în coadă (coada[sfarsit++] = x).*/
+        }
+
+    }
+}
+int main()
+{
+    cout<<"Numarul de noduri: ";
+    cin>>n;
+    cout<<"Numarul de muchii: ";
+    cin>>m;
+    cout<<"Dati graful prin muchii e1 si e2:";
+    for (i = 1; i <= m; i++)
+    {
+        cout<<"Muchia"<<i<<endl;
+        cout<<"e1=";
+        cin>>e1;
+        cout<<"e2 = ";
+        cin>>e2;
+        a[e1][e2] = a[e2][e1] = 1;
+    }
+    cout<<"Nodul de plecare: ";
+    cin>>x;
+    bfs(x);
+    return 0;
+}
